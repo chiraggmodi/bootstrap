@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,6 +7,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Carousel</title>
   <link rel="stylesheet" href="../../../dist/css/bootstrap.min.css">
+=======
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="../../../dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Carousel</title>
+    <style>
+      .carousel-item {
+        transition: transform 2s ease, opacity .5s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Carousel <small>Bootstrap Visual Test</small></h1>
+>>>>>>> cfd00b5eeb7b7440afb3f115a66ea3c58e2e2d5d
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -16,6 +35,7 @@
 </head>
 <body>
 
+<<<<<<< HEAD
 <div class="container">
 
   <div class="page-header">
@@ -37,6 +57,33 @@
       </div>
       <div class="item">
         <img alt="Third slide" src="http://38.media.tumblr.com/tumblr_m8tb2rVsD31qa42jro1_1280.jpg">
+=======
+      <div id="carousel-example-generic" class="carousel slide" data-bs-ride="carousel">
+        <ol class="carousel-indicators">
+          <li data-bs-target="#carousel-example-generic" data-bs-slide-to="0" class="active"></li>
+          <li data-bs-target="#carousel-example-generic" data-bs-slide-to="1"></li>
+          <li data-bs-target="#carousel-example-generic" data-bs-slide-to="2"></li>
+        </ol>
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="https://i.imgur.com/iEZgY7Y.jpg" alt="First slide">
+          </div>
+          <div class="carousel-item">
+            <img src="https://i.imgur.com/eNWn1Xs.jpg" alt="Second slide">
+          </div>
+          <div class="carousel-item">
+            <img src="https://i.imgur.com/Nm7xoti.jpg" alt="Third slide">
+          </div>
+        </div>
+        <a class="carousel-control-prev" href="#carousel-example-generic" role="button" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carousel-example-generic" role="button" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </a>
+>>>>>>> cfd00b5eeb7b7440afb3f115a66ea3c58e2e2d5d
       </div>
     </div>
     <a class="left carousel-control" href="#carousel-example-generic" data-slide="prev">
@@ -49,10 +96,22 @@
 
 </div>
 
+<<<<<<< HEAD
 <!-- JavaScript Includes -->
 <script src="../vendor/jquery.min.js"></script>
 <script src="../../transition.js"></script>
 <script src="../../carousel.js"></script>
+=======
+    <script src="../../dist/dom/event-handler.js"></script>
+    <script src="../../dist/dom/selector-engine.js"></script>
+    <script src="../../dist/dom/manipulator.js"></script>
+    <script src="../../dist/dom/data.js"></script>
+    <script src="../../dist/carousel.js"></script>
+    <script>
+      var t0
+      var t1
+      var carousel = document.getElementById('carousel-example-generic')
+>>>>>>> cfd00b5eeb7b7440afb3f115a66ea3c58e2e2d5d
 
 </body>
 </html>

@@ -1,8 +1,8 @@
 'use strict'
 
 const path = require('path')
-const babel = require('rollup-plugin-babel')
-const resolve = require('rollup-plugin-node-resolve')
+const { babel } = require('@rollup/plugin-babel')
+const { nodeResolve } = require('@rollup/plugin-node-resolve')
 const banner = require('./banner.js')
 
 const BUNDLE = process.env.BUNDLE === 'true'
@@ -11,42 +11,12 @@ const ESM = process.env.ESM === 'true'
 let fileDest = `bootstrap${ESM ? '.esm' : ''}`
 const external = ['popper.js']
 const plugins = [
-  babel(ESM ?
-    {
-      // Only transpile our source code
-      exclude: 'node_modules/**',
-      babelrc: false,
-      presets: [
-        [
-          '@babel/env',
-          {
-            loose: true,
-            modules: false,
-            targets: {
-              browsers: [
-                'Chrome >= 60',
-                'Safari >= 10.1',
-                'iOS >= 10.3',
-                'Firefox >= 54',
-                'Edge >= 15'
-              ]
-            }
-          }
-        ]
-      ]
-    } :
-    {
+  babel({
     // Only transpile our source code
-      exclude: 'node_modules/**',
-      // Include only required helpers
-      externalHelpersWhitelist: [
-        'defineProperties',
-        'createClass',
-        'inheritsLoose',
-        'defineProperty',
-        'objectSpread'
-      ]
-    })
+    exclude: 'node_modules/**',
+    // Include the helpers in the bundle, at most one copy of each
+    babelHelpers: 'bundled'
+  })
 ]
 const globals = {
   'popper.js': 'Popper'
@@ -57,7 +27,7 @@ if (BUNDLE) {
   // Remove last entry in external array to bundle Popper
   external.pop()
   delete globals['popper.js']
-  plugins.push(resolve())
+  plugins.push(nodeResolve())
 }
 
 const rollupConfig = {

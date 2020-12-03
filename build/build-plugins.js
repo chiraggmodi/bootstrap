@@ -1,37 +1,32 @@
+#!/usr/bin/env node
+
 /*!
  * Script to build our plugins to use them separately.
- * Copyright 2019 The Bootstrap Authors
- * Copyright 2019 Twitter, Inc.
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * Copyright 2020 The Bootstrap Authors
+ * Copyright 2020 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
 
 'use strict'
 
 const path = require('path')
 const rollup = require('rollup')
-const babel = require('rollup-plugin-babel')
+const { babel } = require('@rollup/plugin-babel')
 const banner = require('./banner.js')
 
-const TEST = process.env.NODE_ENV === 'test'
 const plugins = [
   babel({
     // Only transpile our source code
     exclude: 'node_modules/**',
-    // Include only required helpers
-    externalHelpersWhitelist: [
-      'defineProperties',
-      'createClass',
-      'inheritsLoose',
-      'defineProperty',
-      'objectSpread'
-    ]
+    // Inline the required helpers in each file
+    babelHelpers: 'inline'
   })
 ]
 const bsPlugins = {
   Data: path.resolve(__dirname, '../js/src/dom/data.js'),
-  EventHandler: path.resolve(__dirname, '../js/src/dom/eventHandler.js'),
+  EventHandler: path.resolve(__dirname, '../js/src/dom/event-handler.js'),
   Manipulator: path.resolve(__dirname, '../js/src/dom/manipulator.js'),
-  SelectorEngine: path.resolve(__dirname, '../js/src/dom/selectorEngine.js'),
+  SelectorEngine: path.resolve(__dirname, '../js/src/dom/selector-engine.js'),
   Alert: path.resolve(__dirname, '../js/src/alert.js'),
   Button: path.resolve(__dirname, '../js/src/button.js'),
   Carousel: path.resolve(__dirname, '../js/src/carousel.js'),
@@ -44,12 +39,7 @@ const bsPlugins = {
   Toast: path.resolve(__dirname, '../js/src/toast.js'),
   Tooltip: path.resolve(__dirname, '../js/src/tooltip.js')
 }
-const rootPath = TEST ? '../js/coverage/dist/' : '../js/dist/'
-
-if (TEST) {
-  bsPlugins.Util = path.resolve(__dirname, '../js/src/util/index.js')
-  bsPlugins.Sanitizer = path.resolve(__dirname, '../js/src/util/sanitizer.js')
-}
+const rootPath = path.resolve(__dirname, '../js/dist/')
 
 const defaultPluginConfig = {
   external: [
@@ -64,7 +54,7 @@ const defaultPluginConfig = {
   }
 }
 
-function getConfigByPluginKey(pluginKey) {
+const getConfigByPluginKey = pluginKey => {
   if (
     pluginKey === 'Data' ||
     pluginKey === 'Manipulator' ||
@@ -74,8 +64,7 @@ function getConfigByPluginKey(pluginKey) {
     pluginKey === 'Sanitizer'
   ) {
     return {
-      external: [],
-      globals: {}
+      external: []
     }
   }
 
@@ -135,50 +124,59 @@ function getConfigByPluginKey(pluginKey) {
   }
 }
 
-function build(plugin) {
+const utilObjects = new Set([
+  'Util',
+  'Sanitizer'
+])
+
+const domObjects = new Set([
+  'Data',
+  'EventHandler',
+  'Manipulator',
+  'SelectorEngine'
+])
+
+const build = async plugin => {
   console.log(`Building ${plugin} plugin...`)
 
   const { external, globals } = getConfigByPluginKey(plugin)
+  const pluginFilename = path.basename(bsPlugins[plugin])
   let pluginPath = rootPath
 
-  const utilObjects = [
-    'Util',
-    'Sanitizer'
-  ]
-
-  const domObjects = [
-    'Data',
-    'EventHandler',
-    'Manipulator',
-    'SelectorEngine'
-  ]
-
-  if (utilObjects.includes(plugin)) {
+  if (utilObjects.has(plugin)) {
     pluginPath = `${rootPath}/util/`
   }
 
-  if (domObjects.includes(plugin)) {
+  if (domObjects.has(plugin)) {
     pluginPath = `${rootPath}/dom/`
   }
 
-  const pluginFilename = `${plugin.toLowerCase()}.js`
-
-  rollup.rollup({
+  const bundle = await rollup.rollup({
     input: bsPlugins[plugin],
     plugins,
     external
-  }).then(bundle => {
-    bundle.write({
-      banner: banner(pluginFilename),
-      format: 'umd',
-      name: plugin,
-      sourcemap: true,
-      globals,
-      file: path.resolve(__dirname, `${pluginPath}${pluginFilename}`)
-    })
-      .then(() => console.log(`Building ${plugin} plugin... Done!`))
-      .catch(error => console.error(`${plugin}: ${error}`))
   })
+
+  await bundle.write({
+    banner: banner(pluginFilename),
+    format: 'umd',
+    name: plugin,
+    sourcemap: true,
+    globals,
+    file: path.resolve(__dirname, `${pluginPath}/${pluginFilename}`)
+  })
+
+  console.log(`Building ${plugin} plugin... Done!`)
 }
 
-Object.keys(bsPlugins).forEach(plugin => build(plugin))
+const main = async () => {
+  try {
+    await Promise.all(Object.keys(bsPlugins).map(plugin => build(plugin)))
+  } catch (error) {
+    console.error(error)
+
+    process.exit(1)
+  }
+}
+
+main()

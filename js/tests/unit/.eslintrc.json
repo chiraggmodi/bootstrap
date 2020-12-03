@@ -1,42 +1,17 @@
 {
   "root": true,
-  "env": {
-    "jquery": true,
-    "qunit": true
-  },
-  "globals": {
-    "bootstrap": false,
-    "sinon": false,
-    "Util": false,
-    "Sanitizer": false,
-    "Data": false,
-    "Alert": false,
-    "Button": false,
-    "Carousel": false,
-    "Simulator": false,
-    "Toast": false,
-    "EventHandler": false,
-    "Manipulator": false,
-    "SelectorEngine": false
-  },
-  "parserOptions": {
-    "ecmaVersion": 5,
-    "sourceType": "script"
-  },
   "extends": [
-    "plugin:unicorn/recommended",
-    "xo",
-    "xo/browser"
+    "../../../.eslintrc.json"
   ],
-  "rules": {
-    "capitalized-comments": "off",
-    "indent": [
-      "error",
-      2,
-      {
-        "MemberExpression": "off",
-        "SwitchCase": 1
+  "overrides": [
+    {
+      "files": [
+        "**/*.spec.js"
+      ],
+      "env": {
+        "jasmine": true
       }
+<<<<<<< HEAD
     ],
     "multiline-ternary": [
       "error",
@@ -60,4 +35,8 @@
     "unicorn/prefer-query-selector": "off",
     "unicorn/prevent-abbreviations": "off"
   }
+=======
+    }
+  ]
+>>>>>>> cfd00b5eeb7b7440afb3f115a66ea3c58e2e2d5d
 }

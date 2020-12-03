@@ -18,8 +18,9 @@ the preferred channel for [bug reports](#bug-reports), [features requests](#feat
 and [submitting pull requests](#pull-requests), but please respect the following
 restrictions:
 
-* Please **do not** use the issue tracker for personal support requests. Stack
-  Overflow ([`twitter-bootstrap-3`](https://stackoverflow.com/questions/tagged/twitter-bootstrap-3) tag), [Slack](https://bootstrap-slack.herokuapp.com/) or [IRC](README.md#community) are better places to get help.
+* Please **do not** use the issue tracker for personal support requests.  Stack
+  Overflow ([`bootstrap-5`](https://stackoverflow.com/questions/tagged/bootstrap-5) tag),
+  [Slack](https://bootstrap-slack.herokuapp.com/) or [IRC](README.md#community) are better places to get help.
 
 * Please **do not** derail or troll issues. Keep the discussion on topic and
   respect the opinions of others.
@@ -62,15 +63,19 @@ Good bug reports are extremely helpful, so thanks!
 
 Guidelines for bug reports:
 
+<<<<<<< HEAD
 0. **Validate and lint your code** &mdash; [validate your HTML](http://html5.validator.nu)
    and [lint your HTML](https://github.com/twbs/bootlint) to ensure your
+=======
+0. **[Validate your HTML](https://html5.validator.nu/)** to ensure your
+>>>>>>> cfd00b5eeb7b7440afb3f115a66ea3c58e2e2d5d
    problem isn't caused by a simple error in your own code.
 
 1. **Use the GitHub issue search** &mdash; check if the issue has already been
    reported.
 
 2. **Check if the issue has been fixed** &mdash; try to reproduce it using the
-   latest `master` or development branch in the repository.
+   latest `main` (or `v4-dev` branch if the issue is about v4) in the repository.
 
 3. **Isolate the problem** &mdash; ideally create a [reduced test
    case](https://css-tricks.com/reduced-test-cases/) and a live example.
@@ -105,6 +110,7 @@ Example:
 ### Reporting upstream browser bugs
 
 Sometimes bugs reported to us are actually caused by bugs in the browser(s) themselves, not bugs in Bootstrap per se.
+<<<<<<< HEAD
 When feasible, we aim to report such upstream bugs to the relevant browser vendor(s), and then list them on our [Wall of Browser Bugs](http://getbootstrap.com/browser-bugs/) and [document them in MDN](https://developer.mozilla.org/en-US/docs/Web).
 
 | Vendor(s)     | Browser(s)                   | Rendering engine | Bug reporting website(s)                                                              | Notes                                                    |
@@ -113,6 +119,15 @@ When feasible, we aim to report such upstream bugs to the relevant browser vendo
 | Apple         | Safari                       | WebKit           | https://bugs.webkit.org/enter_bug.cgi?product=WebKit <br> https://bugreport.apple.com | In Apple's bug reporter, choose "Safari" as the product. |
 | Google, Opera | Chrome, Chromium, Opera v15+ | Blink            | https://code.google.com/p/chromium/issues/list                                        | Click the "New issue" button.                            |
 | Microsoft     | Edge                         | EdgeHTML         | https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/                 |                                                          |
+=======
+
+| Vendor(s)     | Browser(s)                   | Rendering engine | Bug reporting website(s)                                              | Notes                                                    |
+| ------------- | ---------------------------- | ---------------- | --------------------------------------------------------------------- | -------------------------------------------------------- |
+| Mozilla       | Firefox                      | Gecko            | https://bugzilla.mozilla.org/enter_bug.cgi                            | "Core" is normally the right product option to choose.   |
+| Apple         | Safari                       | WebKit           | https://bugs.webkit.org/enter_bug.cgi?product=WebKit                  | In Apple's bug reporter, choose "Safari" as the product. |
+| Google, Opera | Chrome, Chromium, Opera v15+ | Blink            | https://bugs.chromium.org/p/chromium/issues/list                      | Click the "New issue" button.                            |
+| Microsoft     | Edge                         | Blink            | https://developer.microsoft.com/en-us/microsoft-edge/                 | Go to "Help > Send Feedback" from the browser            |
+>>>>>>> cfd00b5eeb7b7440afb3f115a66ea3c58e2e2d5d
 
 ### Issues bots
 
@@ -139,10 +154,12 @@ Good pull requests—patches, improvements, new features—are a fantastic
 help. They should remain focused in scope and avoid containing unrelated
 commits.
 
-**Please ask first** before embarking on any significant pull request (e.g.
+**Please ask first** before embarking on any **significant** pull request (e.g.
 implementing features, refactoring code, porting to a different language),
 otherwise you risk spending a lot of time working on something that the
-project's developers might not want to merge into the project.
+project's developers might not want to merge into the project. For trivial
+things, or things that don't require a lot of your time, you can go ahead and
+make a PR.
 
 In particular, **pull requests that add new features to Bootstrap v3 will be
 rejected.** Bootstrap v3 is now in maintenance mode and is therefore closed
@@ -157,6 +174,7 @@ project (indentation, accurate comments, etc.) and any other requirements
 
 **Do not edit `bootstrap.css`, `bootstrap-theme.css`, or `bootstrap.js`
 directly!** Those files are automatically generated. You should edit the
+<<<<<<< HEAD
 source files in [`/bootstrap/less/`](https://github.com/twbs/bootstrap/tree/master/less),
 [`/bootstrap/scss/`](https://github.com/twbs/bootstrap/tree/v4-dev/scss) (for Bootstrap v4),
 and/or [`/bootstrap/js/`](https://github.com/twbs/bootstrap/tree/master/js) instead.
@@ -164,6 +182,14 @@ and/or [`/bootstrap/js/`](https://github.com/twbs/bootstrap/tree/master/js) inst
 Similarly, when contributing to Bootstrap's documentation, you should edit the
 documentation source files in
 [the `/bootstrap/docs/` directory of the `master` branch](https://github.com/twbs/bootstrap/tree/master/docs).
+=======
+source files in [`/bootstrap/scss/`](https://github.com/twbs/bootstrap/tree/main/scss)
+and/or [`/bootstrap/js/src/`](https://github.com/twbs/bootstrap/tree/main/js/src) instead.
+
+Similarly, when contributing to Bootstrap's documentation, you should edit the
+documentation source files in
+[the `/bootstrap/site/content/docs/` directory of the `main` branch](https://github.com/twbs/bootstrap/tree/main/site/content/docs).
+>>>>>>> cfd00b5eeb7b7440afb3f115a66ea3c58e2e2d5d
 **Do not edit the `gh-pages` branch.** That branch is generated from the
 documentation source files and is managed separately by the Bootstrap Core Team.
 
@@ -185,8 +211,8 @@ included in the project:
 2. If you cloned a while ago, get the latest changes from upstream:
 
    ```bash
-   git checkout master
-   git pull upstream master
+   git checkout main
+   git pull upstream main
    ```
 
 3. Create a new topic branch (off the main project development branch) to
@@ -205,7 +231,7 @@ included in the project:
 5. Locally merge (or rebase) the upstream development branch into your topic branch:
 
    ```bash
-   git pull [--rebase] upstream master
+   git pull [--rebase] upstream main
    ```
 
 6. Push your topic branch up to your fork:
@@ -214,11 +240,16 @@ included in the project:
    git push origin <topic-branch-name>
    ```
 
+<<<<<<< HEAD
 7. [Open a Pull Request](https://help.github.com/articles/using-pull-requests/)
     with a clear title and description against the `master` branch.
+=======
+7. [Open a Pull Request](https://help.github.com/articles/about-pull-requests/)
+    with a clear title and description against the `main` branch.
+>>>>>>> cfd00b5eeb7b7440afb3f115a66ea3c58e2e2d5d
 
 **IMPORTANT**: By submitting a patch, you agree to allow the project owners to
-license your work under the terms of the [MIT License](LICENSE) (if it
+license your work under the terms of the [MIT License](../LICENSE) (if it
 includes code changes) and under the terms of the
 [Creative Commons Attribution 3.0 Unported License](docs/LICENSE)
 (if it includes documentation changes).
@@ -237,7 +268,7 @@ includes code changes) and under the terms of the
 
 ### HTML
 
-[Adhere to the Code Guide.](http://codeguide.co/#html)
+[Adhere to the Code Guide.](https://codeguide.co/#html)
 
 - Use tags and elements appropriate for an HTML5 doctype (e.g., self-closing tags).
 - Use CDNs and HTTPS for third-party JS when possible. We don't use protocol-relative URLs in this case because they break when viewing the page locally via `file://`.
@@ -245,10 +276,15 @@ includes code changes) and under the terms of the
 
 ### CSS
 
-[Adhere to the Code Guide.](http://codeguide.co/#css)
+[Adhere to the Code Guide.](https://codeguide.co/#css)
 
+<<<<<<< HEAD
 - When feasible, default color palettes should comply with [WCAG color contrast guidelines](http://www.w3.org/TR/WCAG20/#visual-audio-contrast).
 - Except in rare cases, don't remove default `:focus` styles (via e.g. `outline: none;`) without providing alternative styles. See [this A11Y Project post](http://a11yproject.com/posts/never-remove-css-outlines) for more details.
+=======
+- When feasible, default color palettes should comply with [WCAG color contrast guidelines](https://www.w3.org/TR/WCAG20/#visual-audio-contrast).
+- Except in rare cases, don't remove default `:focus` styles (via e.g. `outline: none;`) without providing alternative styles. See [this A11Y Project post](https://www.a11yproject.com/posts/2013-01-25-never-remove-css-outlines/) for more details.
+>>>>>>> cfd00b5eeb7b7440afb3f115a66ea3c58e2e2d5d
 
 ### JS
 
@@ -265,7 +301,12 @@ Run `grunt test` before committing to ensure your changes follow our coding stan
 
 ## License
 
+<<<<<<< HEAD
 By contributing your code, you agree to license your contribution under the [MIT License](LICENSE).
 By contributing to the documentation, you agree to license your contribution under the [Creative Commons Attribution 3.0 Unported License](docs/LICENSE).
+=======
+By contributing your code, you agree to license your contribution under the [MIT License](../LICENSE).
+By contributing to the documentation, you agree to license your contribution under the [Creative Commons Attribution 3.0 Unported License](https://creativecommons.org/licenses/by/3.0/).
+>>>>>>> cfd00b5eeb7b7440afb3f115a66ea3c58e2e2d5d
 
 Prior to v3.1.0, Bootstrap's code was released under the Apache License v2.0.

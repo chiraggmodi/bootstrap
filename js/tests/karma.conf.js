@@ -1,28 +1,27 @@
 /* eslint-env node */
-/* eslint no-process-env: 0 */
 
 const path = require('path')
 const ip = require('ip')
+const { babel } = require('@rollup/plugin-babel')
+const istanbul = require('rollup-plugin-istanbul')
+const { nodeResolve } = require('@rollup/plugin-node-resolve')
+
 const {
   browsers,
   browsersKeys
 } = require('./browsers')
 
 const { env } = process
-const bundle = env.BUNDLE === 'true'
 const browserStack = env.BROWSER === 'true'
 const debug = env.DEBUG === 'true'
-
-const jqueryFile = 'node_modules/jquery/dist/jquery.slim.min.js'
-
+const jQueryTest = env.JQUERY === 'true'
 const frameworks = [
-  'qunit',
-  'sinon'
+  'jasmine'
 ]
 
 const plugins = [
-  'karma-qunit',
-  'karma-sinon'
+  'karma-jasmine',
+  'karma-rollup-preprocessor'
 ]
 
 const reporters = ['dots']
@@ -34,11 +33,15 @@ const detectBrowsers = {
       return debug ? ['Chrome'] : ['ChromeHeadless']
     }
 
+    if (availableBrowser.includes('Chromium')) {
+      return debug ? ['Chromium'] : ['ChromiumHeadless']
+    }
+
     if (availableBrowser.includes('Firefox')) {
       return debug ? ['Firefox'] : ['FirefoxHeadless']
     }
 
-    throw new Error('Please install Firefox or Chrome')
+    throw new Error('Please install Chrome, Chromium or Firefox')
   }
 }
 
@@ -49,11 +52,6 @@ const customLaunchers = {
   }
 }
 
-let files = [
-  'node_modules/popper.js/dist/umd/popper.min.js',
-  'node_modules/hammer-simulator/index.js'
-]
-
 const conf = {
   basePath: '../..',
   port: 9876,
@@ -62,28 +60,44 @@ const conf = {
   singleRun: true,
   concurrency: Infinity,
   client: {
-    qunit: {
-      showUI: true
+    clearContext: false
+  },
+  files: [
+    'node_modules/hammer-simulator/index.js',
+    {
+      pattern: 'js/tests/unit/**/!(jquery).spec.js',
+      watched: !browserStack
+    }
+  ],
+  preprocessors: {
+    'js/tests/unit/**/*.spec.js': ['rollup']
+  },
+  rollupPreprocessor: {
+    plugins: [
+      istanbul({
+        exclude: [
+          'node_modules/**',
+          'js/tests/unit/**/*.spec.js',
+          'js/tests/helpers/**/*.js'
+        ]
+      }),
+      babel({
+        // Only transpile our source code
+        exclude: 'node_modules/**',
+        // Inline the required helpers in each file
+        babelHelpers: 'inline'
+      }),
+      nodeResolve()
+    ],
+    output: {
+      format: 'iife',
+      name: 'bootstrapTest',
+      sourcemap: 'inline'
     }
   }
 }
 
-if (bundle) {
-  frameworks.push('detectBrowsers')
-  plugins.push(
-    'karma-chrome-launcher',
-    'karma-firefox-launcher',
-    'karma-detect-browsers'
-  )
-  conf.customLaunchers = customLaunchers
-  conf.detectBrowsers = detectBrowsers
-  files = files.concat([
-    jqueryFile,
-    'js/tests/unit/tests-polyfills.js',
-    'dist/js/bootstrap.js',
-    'js/tests/unit/!(tests-polyfills).js'
-  ])
-} else if (browserStack) {
+if (browserStack) {
   conf.hostname = ip.address()
   conf.browserStack = {
     username: env.BROWSER_STACK_USERNAME,
@@ -92,27 +106,26 @@ if (bundle) {
     project: 'Bootstrap',
     retryLimit: 2
   }
-  plugins.push('karma-browserstack-launcher')
+  plugins.push('karma-browserstack-launcher', 'karma-jasmine-html-reporter')
   conf.customLaunchers = browsers
   conf.browsers = browsersKeys
-  reporters.push('BrowserStack')
-  files = files.concat([
-    jqueryFile,
-    'js/tests/unit/tests-polyfills.js',
-    'js/coverage/dist/util/util.js',
-    'js/coverage/dist/util/sanitizer.js',
-    'js/coverage/dist/dom/polyfill.js',
-    'js/coverage/dist/dom/eventHandler.js',
-    'js/coverage/dist/dom/selectorEngine.js',
-    'js/coverage/dist/dom/data.js',
-    'js/coverage/dist/dom/manipulator.js',
-    'js/coverage/dist/dom/!(polyfill).js',
-    'js/coverage/dist/tooltip.js',
-    'js/coverage/dist/!(util|index|tooltip).js', // include all of our js/dist files except util.js, index.js and tooltip.js
-    'js/tests/unit/!(tests-polyfills).js',
-    'js/tests/unit/dom/*.js',
-    'js/tests/unit/util/*.js'
-  ])
+  reporters.push('BrowserStack', 'kjhtml')
+} else if (jQueryTest) {
+  frameworks.push('detectBrowsers')
+  plugins.push(
+    'karma-chrome-launcher',
+    'karma-firefox-launcher',
+    'karma-detect-browsers'
+  )
+  conf.customLaunchers = customLaunchers
+  conf.detectBrowsers = detectBrowsers
+  conf.files = [
+    'node_modules/jquery/dist/jquery.slim.min.js',
+    {
+      pattern: 'js/tests/unit/jquery.spec.js',
+      watched: false
+    }
+  ]
 } else {
   frameworks.push('detectBrowsers')
   plugins.push(
@@ -121,23 +134,6 @@ if (bundle) {
     'karma-detect-browsers',
     'karma-coverage-istanbul-reporter'
   )
-  files = files.concat([
-    jqueryFile,
-    'js/tests/unit/tests-polyfills.js',
-    'js/coverage/dist/util/util.js',
-    'js/coverage/dist/util/sanitizer.js',
-    'js/coverage/dist/dom/polyfill.js',
-    'js/coverage/dist/dom/eventHandler.js',
-    'js/coverage/dist/dom/selectorEngine.js',
-    'js/coverage/dist/dom/data.js',
-    'js/coverage/dist/dom/manipulator.js',
-    'js/coverage/dist/dom/!(polyfill).js',
-    'js/coverage/dist/tooltip.js',
-    'js/coverage/dist/!(util|index|tooltip).js', // include all of our js/dist files except util.js, index.js and tooltip.js
-    'js/tests/unit/!(tests-polyfills).js',
-    'js/tests/unit/dom/*.js',
-    'js/tests/unit/util/*.js'
-  ])
   reporters.push('coverage-istanbul')
   conf.customLaunchers = customLaunchers
   conf.detectBrowsers = detectBrowsers
@@ -148,24 +144,17 @@ if (bundle) {
       emitWarning: false,
       global: {
         statements: 90,
-        branches: 86,
-        functions: 89,
+        branches: 89,
+        functions: 90,
         lines: 90
-      },
-      each: {
-        overrides: {
-          'js/src/dom/polyfill.js': {
-            statements: 39,
-            lines: 37,
-            branches: 19,
-            functions: 50
-          }
-        }
       }
     }
   }
 
   if (debug) {
+    conf.hostname = ip.address()
+    plugins.push('karma-jasmine-html-reporter')
+    reporters.push('kjhtml')
     conf.singleRun = false
     conf.autoWatch = true
   }
@@ -174,7 +163,6 @@ if (bundle) {
 conf.frameworks = frameworks
 conf.plugins = plugins
 conf.reporters = reporters
-conf.files = files
 
 module.exports = karmaConfig => {
   // possible values: karmaConfig.LOG_DISABLE || karmaConfig.LOG_ERROR || karmaConfig.LOG_WARN || karmaConfig.LOG_INFO || karmaConfig.LOG_DEBUG

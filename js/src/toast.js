@@ -1,20 +1,23 @@
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.3.1): toast.js
- * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * Bootstrap (v5.0.0-alpha3): toast.js
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  * --------------------------------------------------------------------------
  */
 
 import {
-  jQuery as $,
+  getjQuery,
+  onDOMContentLoaded,
   TRANSITION_END,
   emulateTransitionEnd,
   getTransitionDurationFromElement,
+  reflow,
   typeCheckConfig
 } from './util/index'
 import Data from './dom/data'
-import EventHandler from './dom/eventHandler'
+import EventHandler from './dom/event-handler'
 import Manipulator from './dom/manipulator'
+import BaseComponent from './base-component'
 
 /**
  * ------------------------------------------------------------------------
@@ -23,24 +26,19 @@ import Manipulator from './dom/manipulator'
  */
 
 const NAME = 'toast'
-const VERSION = '4.3.1'
 const DATA_KEY = 'bs.toast'
 const EVENT_KEY = `.${DATA_KEY}`
 
-const Event = {
-  CLICK_DISMISS: `click.dismiss${EVENT_KEY}`,
-  HIDE: `hide${EVENT_KEY}`,
-  HIDDEN: `hidden${EVENT_KEY}`,
-  SHOW: `show${EVENT_KEY}`,
-  SHOWN: `shown${EVENT_KEY}`
-}
+const EVENT_CLICK_DISMISS = `click.dismiss${EVENT_KEY}`
+const EVENT_HIDE = `hide${EVENT_KEY}`
+const EVENT_HIDDEN = `hidden${EVENT_KEY}`
+const EVENT_SHOW = `show${EVENT_KEY}`
+const EVENT_SHOWN = `shown${EVENT_KEY}`
 
-const ClassName = {
-  FADE: 'fade',
-  HIDE: 'hide',
-  SHOW: 'show',
-  SHOWING: 'showing'
-}
+const CLASS_NAME_FADE = 'fade'
+const CLASS_NAME_HIDE = 'hide'
+const CLASS_NAME_SHOW = 'show'
+const CLASS_NAME_SHOWING = 'showing'
 
 const DefaultType = {
   animation: 'boolean',
@@ -51,12 +49,10 @@ const DefaultType = {
 const Default = {
   animation: true,
   autohide: true,
-  delay: 500
+  delay: 5000
 }
 
-const Selector = {
-  DATA_DISMISS: '[data-dismiss="toast"]'
-}
+const SELECTOR_DATA_DISMISS = '[data-bs-dismiss="toast"]'
 
 /**
  * ------------------------------------------------------------------------
@@ -64,20 +60,16 @@ const Selector = {
  * ------------------------------------------------------------------------
  */
 
-class Toast {
+class Toast extends BaseComponent {
   constructor(element, config) {
-    this._element = element
+    super(element)
+
     this._config = this._getConfig(config)
     this._timeout = null
     this._setListeners()
-    Data.setData(element, DATA_KEY, this)
   }
 
   // Getters
-
-  static get VERSION() {
-    return VERSION
-  }
 
   static get DefaultType() {
     return DefaultType
@@ -87,28 +79,41 @@ class Toast {
     return Default
   }
 
+  static get DATA_KEY() {
+    return DATA_KEY
+  }
+
   // Public
 
   show() {
-    EventHandler.trigger(this._element, Event.SHOW)
+    const showEvent = EventHandler.trigger(this._element, EVENT_SHOW)
+
+    if (showEvent.defaultPrevented) {
+      return
+    }
+
+    this._clearTimeout()
 
     if (this._config.animation) {
-      this._element.classList.add(ClassName.FADE)
+      this._element.classList.add(CLASS_NAME_FADE)
     }
 
     const complete = () => {
-      this._element.classList.remove(ClassName.SHOWING)
-      this._element.classList.add(ClassName.SHOW)
+      this._element.classList.remove(CLASS_NAME_SHOWING)
+      this._element.classList.add(CLASS_NAME_SHOW)
 
-      EventHandler.trigger(this._element, Event.SHOWN)
+      EventHandler.trigger(this._element, EVENT_SHOWN)
 
       if (this._config.autohide) {
-        this.hide()
+        this._timeout = setTimeout(() => {
+          this.hide()
+        }, this._config.delay)
       }
     }
 
-    this._element.classList.remove(ClassName.HIDE)
-    this._element.classList.add(ClassName.SHOWING)
+    this._element.classList.remove(CLASS_NAME_HIDE)
+    reflow(this._element)
+    this._element.classList.add(CLASS_NAME_SHOWING)
     if (this._config.animation) {
       const transitionDuration = getTransitionDurationFromElement(this._element)
 
@@ -119,34 +124,43 @@ class Toast {
     }
   }
 
-  hide(withoutTimeout) {
-    if (!this._element.classList.contains(ClassName.SHOW)) {
+  hide() {
+    if (!this._element.classList.contains(CLASS_NAME_SHOW)) {
       return
     }
 
-    EventHandler.trigger(this._element, Event.HIDE)
+    const hideEvent = EventHandler.trigger(this._element, EVENT_HIDE)
 
-    if (withoutTimeout) {
-      this._close()
+    if (hideEvent.defaultPrevented) {
+      return
+    }
+
+    const complete = () => {
+      this._element.classList.add(CLASS_NAME_HIDE)
+      EventHandler.trigger(this._element, EVENT_HIDDEN)
+    }
+
+    this._element.classList.remove(CLASS_NAME_SHOW)
+    if (this._config.animation) {
+      const transitionDuration = getTransitionDurationFromElement(this._element)
+
+      EventHandler.one(this._element, TRANSITION_END, complete)
+      emulateTransitionEnd(this._element, transitionDuration)
     } else {
-      this._timeout = setTimeout(() => {
-        this._close()
-      }, this._config.delay)
+      complete()
     }
   }
 
   dispose() {
-    clearTimeout(this._timeout)
-    this._timeout = null
+    this._clearTimeout()
 
-    if (this._element.classList.contains(ClassName.SHOW)) {
-      this._element.classList.remove(ClassName.SHOW)
+    if (this._element.classList.contains(CLASS_NAME_SHOW)) {
+      this._element.classList.remove(CLASS_NAME_SHOW)
     }
 
-    EventHandler.off(this._element, Event.CLICK_DISMISS)
-    Data.removeData(this._element, DATA_KEY)
+    EventHandler.off(this._element, EVENT_CLICK_DISMISS)
 
-    this._element = null
+    super.dispose()
     this._config = null
   }
 
@@ -156,47 +170,26 @@ class Toast {
     config = {
       ...Default,
       ...Manipulator.getDataAttributes(this._element),
-      ...typeof config === 'object' && config ? config : {}
+      ...(typeof config === 'object' && config ? config : {})
     }
 
-    typeCheckConfig(
-      NAME,
-      config,
-      this.constructor.DefaultType
-    )
+    typeCheckConfig(NAME, config, this.constructor.DefaultType)
 
     return config
   }
 
   _setListeners() {
-    EventHandler.on(
-      this._element,
-      Event.CLICK_DISMISS,
-      Selector.DATA_DISMISS,
-      () => this.hide(true)
-    )
+    EventHandler.on(this._element, EVENT_CLICK_DISMISS, SELECTOR_DATA_DISMISS, () => this.hide())
   }
 
-  _close() {
-    const complete = () => {
-      this._element.classList.add(ClassName.HIDE)
-      EventHandler.trigger(this._element, Event.HIDDEN)
-    }
-
-    this._element.classList.remove(ClassName.SHOW)
-    if (this._config.animation) {
-      const transitionDuration = getTransitionDurationFromElement(this._element)
-
-      EventHandler.one(this._element, TRANSITION_END, complete)
-      emulateTransitionEnd(this._element, transitionDuration)
-    } else {
-      complete()
-    }
+  _clearTimeout() {
+    clearTimeout(this._timeout)
+    this._timeout = null
   }
 
   // Static
 
-  static _jQueryInterface(config) {
+  static jQueryInterface(config) {
     return this.each(function () {
       let data = Data.getData(this, DATA_KEY)
       const _config = typeof config === 'object' && config
@@ -214,27 +207,27 @@ class Toast {
       }
     })
   }
-
-  static _getInstance(element) {
-    return Data.getData(element, DATA_KEY)
-  }
 }
 
 /**
  * ------------------------------------------------------------------------
  * jQuery
  * ------------------------------------------------------------------------
- *  add .toast to jQuery only if jQuery is present
+ * add .Toast to jQuery only if jQuery is present
  */
 
-if (typeof $ !== 'undefined') {
-  const JQUERY_NO_CONFLICT = $.fn[NAME]
-  $.fn[NAME] = Toast._jQueryInterface
-  $.fn[NAME].Constructor = Toast
-  $.fn[NAME].noConflict = () => {
-    $.fn[NAME] = JQUERY_NO_CONFLICT
-    return Toast._jQueryInterface
+onDOMContentLoaded(() => {
+  const $ = getjQuery()
+  /* istanbul ignore if */
+  if ($) {
+    const JQUERY_NO_CONFLICT = $.fn[NAME]
+    $.fn[NAME] = Toast.jQueryInterface
+    $.fn[NAME].Constructor = Toast
+    $.fn[NAME].noConflict = () => {
+      $.fn[NAME] = JQUERY_NO_CONFLICT
+      return Toast.jQueryInterface
+    }
   }
-}
+})
 
 export default Toast
